@@ -3,7 +3,6 @@ import GuildExtension from './GuildExtension';
 
 GuildExtension.applyToClass(Guild);
 
-export * from './Client';
 export * from './Error';
 export * from './GuildExtension';
 export * from './Playlist';
