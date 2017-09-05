@@ -1,21 +1,12 @@
 import { Playlist as Cassette, Song } from 'cassette';
-import { Guild, StreamDispatcher, VoiceChannel, VoiceConnection } from 'discord.js';
+import { Client, Guild, StreamDispatcher, VoiceChannel, VoiceConnection } from 'discord.js';
 
-import Client from './Client';
 import Error, { Code } from './Error';
+import GuildExtension from './GuildExtension';
 
 export type EndReason = 'temp' | 'terminal';
 
 export default class Playlist extends Cassette {
-  public static get(client: Client, guild: Guild): Playlist {
-    const existing = client.playlists.get(guild.id);
-    if (existing) return existing;
-
-    const pl = new this(client, guild);
-    client.playlists.set(guild.id, pl);
-    return pl;
-  }
-
   public static ensureVoiceConnection(channel: VoiceChannel): Promise<VoiceConnection> {
     if (channel.connection) return Promise.resolve(channel.connection);
 
@@ -25,13 +16,11 @@ export default class Playlist extends Cassette {
     return channel.join();
   }
 
-  public readonly client: Client;
-  public readonly guild: Guild;
-  private _playing: boolean;
+  public readonly guild: GuildExtension;
+  private _playing: boolean = false;
 
-  constructor(client: Client, guild: Guild) {
+  constructor(guild: GuildExtension) {
     super();
-    this.client = client;
     this.guild = guild;
   }
 
@@ -96,6 +85,6 @@ export default class Playlist extends Cassette {
 
   private _destroy(): void {
     if (this.guild.voiceConnection) this.guild.voiceConnection.disconnect();
-    this.client.playlists.delete(this.guild.id);
+    this.guild.playlist.reset();
   }
 }
