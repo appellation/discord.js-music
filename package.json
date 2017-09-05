@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/appellation/discord.js-music#readme",
   "dependencies": {
-    "cassette": "file:..\\playlists"
+    "cassette": "github:appellation/cassette#master"
   },
   "devDependencies": {
     "@types/node": "^8.0.26",
