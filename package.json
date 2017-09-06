@@ -2,7 +2,7 @@
   "name": "discord.js-music",
   "version": "0.1.0",
   "description": "Music for discord.js",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "prepare": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
