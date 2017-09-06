@@ -7,6 +7,7 @@
     "prepare": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "typings": "typings/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/appellation/discord.js-music.git"
