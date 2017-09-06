@@ -1,8 +1,13 @@
 import { Guild } from 'discord.js';
+
+import Error from './Error';
 import GuildExtension from './GuildExtension';
+import Playlist from './Playlist';
 
 GuildExtension.applyToClass(Guild);
 
-export * from './Error';
-export * from './GuildExtension';
-export * from './Playlist';
+export {
+  Error,
+  GuildExtension,
+  Playlist,
+};
