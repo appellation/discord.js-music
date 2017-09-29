@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "prepare": "gulp",
+    "postinstall": "postinstall-build --only-as-dependency dist \"gulp\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "typings": "typings/index.d.ts",
@@ -19,7 +20,8 @@
   },
   "homepage": "https://github.com/appellation/discord.js-music#readme",
   "dependencies": {
-    "cassette": "git+https://github.com/appellation/cassette.git"
+    "cassette": "^2.0.3",
+    "postinstall-build": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^8.0.26",
