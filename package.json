@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/appellation/discord.js-music#readme",
   "dependencies": {
-    "cassette": "^2.0.3",
+    "cassette": "^3.0.0",
     "postinstall-build": "^5.0.1"
   },
   "devDependencies": {
