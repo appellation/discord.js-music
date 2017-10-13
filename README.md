@@ -3,7 +3,6 @@ A module that adds simple music functionality to Discord.js
 
 ### Reference
 `Playlist` *extends* [`CassettePlaylist`](https://github.com/appellation/cassette#reference)
-- *static* **get(client: Client, guild: Guild)**: `DiscordPlaylist` get or make a playlist for a guild. `client` is the cassette client, not the discord.js client.
 - *static* **ensureVoiceConnection(channel: VoiceChannel)**: `Promise<VoiceConnection>` ensure a voice connection.
 
 - **`constructor(guild: Guild)`**

@@ -6,7 +6,7 @@
   "scripts": {
     "prepare": "gulp",
     "postinstall": "postinstall-build --only-as-dependency dist \"gulp\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "env-cmd test/.env node test/index.js"
   },
   "typings": "typings/index.d.ts",
   "repository": {
@@ -29,6 +29,7 @@
     "discord.js": "^11.2.1",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.2",
+    "node-opus": "^0.2.7",
     "typescript": "^2.5.2"
   },
   "false": {}
