@@ -1,3 +1,4 @@
+import EventEmitter = require('events');
 import { Playlist as Cassette, Song } from 'cassette';
 import { Client, Guild, StreamDispatcher, VoiceChannel, VoiceConnection } from 'discord.js';
 
@@ -16,6 +17,7 @@ export default class Playlist extends Cassette {
     return channel.join();
   }
 
+  public readonly events: EventEmitter = new EventEmitter();
   public readonly guild: GuildExtension;
   private _playing: boolean = false;
 
@@ -33,19 +35,21 @@ export default class Playlist extends Cassette {
   }
 
   public stop(): void {
-    return this.end('temp');
+    return this._end('temp');
   }
 
   public destroy(): void {
-    return this.end('terminal');
+    return this._end('terminal');
   }
 
   public pause(): void {
     if (this._dispatcher) this._dispatcher.pause();
+    this.events.emit('pause');
   }
 
   public resume(): void {
     if (this._dispatcher) this._dispatcher.resume();
+    this.events.emit('resume');
   }
 
   public async start(channel: VoiceChannel): Promise<void> {
@@ -56,18 +60,30 @@ export default class Playlist extends Cassette {
   private async _start(): Promise<void> {
     this.stop();
 
-    if (!this.current) throw new Error(Code.NO_CURRENT_SONG);
+    if (!this.current) {
+      this.events.emit('error', new Error(Code.NO_CURRENT_SONG));
+      return;
+    }
+
     const stream = await this.current.stream();
-    stream.once('error', () => {
-      if (this._dispatcher) this._dispatcher.end();
+    stream.once('error', (e) => {
+      this._playing = false;
+      this.events.emit('streamError', e);
+      this._end();
     });
 
-    if (!this.guild.voiceConnection) throw new Error(Code.NO_VOICE_CONNECTION);
+    if (!this.guild.voiceConnection) {
+      this.events.emit('error', new Error(Code.NO_VOICE_CONNECTION));
+      return;
+    }
+
     const dispatcher = this.guild.voiceConnection.playStream(stream, { volume: 0.2 });
     this._playing = true;
+    this.events.emit('playing');
 
     dispatcher.once('end', async (reason: EndReason | 'user') => {
       this._playing = false;
+      this.events.emit('ended', reason);
 
       if (reason === 'temp') return;
       if (reason === 'terminal') return this._destroy();
@@ -79,12 +95,13 @@ export default class Playlist extends Cassette {
     });
   }
 
-  private end(reason: EndReason = 'terminal'): void {
+  private _end(reason: EndReason = 'terminal'): void {
     if (this._dispatcher) this._dispatcher.end(reason);
   }
 
   private _destroy(): void {
     if (this.guild.voiceConnection) this.guild.voiceConnection.disconnect();
     this.guild.playlist.reset();
+    this.events.emit('destroyed');
   }
 }
