@@ -1,11 +1,10 @@
 {
   "name": "discord.js-music",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "description": "Music for discord.js",
   "main": "dist/index.js",
   "scripts": {
     "prepare": "gulp",
-    "postinstall": "postinstall-build --only-as-dependency dist \"gulp\"",
     "test": "env-cmd test/.env node test/index.js"
   },
   "typings": "typings/index.d.ts",
@@ -20,8 +19,7 @@
   },
   "homepage": "https://github.com/appellation/discord.js-music#readme",
   "dependencies": {
-    "cassette": "^3.0.2",
-    "postinstall-build": "^5.0.1"
+    "cassette": "^3.0.2"
   },
   "devDependencies": {
     "@types/node": "^8.0.26",
@@ -31,6 +29,5 @@
     "gulp-typescript": "^3.2.2",
     "node-opus": "^0.2.7",
     "typescript": "^2.5.2"
-  },
-  "false": {}
+  }
 }
