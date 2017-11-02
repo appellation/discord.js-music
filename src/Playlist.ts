@@ -1,6 +1,6 @@
 import EventEmitter = require('events');
 import { Playlist as Cassette, Song } from 'cassette';
-import { Client, Guild, StreamDispatcher, VoiceChannel, VoiceConnection } from 'discord.js';
+import { Client, Guild, StreamDispatcher, StreamOptions, VoiceChannel, VoiceConnection } from 'discord.js';
 
 import Error, { Code } from './Error';
 import GuildExtension from './GuildExtension';
@@ -52,12 +52,12 @@ export default class Playlist extends Cassette {
     this.events.emit('resume');
   }
 
-  public async start(channel: VoiceChannel): Promise<void> {
+  public async start(channel: VoiceChannel, options?: StreamOptions): Promise<void> {
     await Playlist.ensureVoiceConnection(channel);
-    await this._start();
+    await this._start(options);
   }
 
-  private async _start(): Promise<void> {
+  private async _start(options?: StreamOptions): Promise<void> {
     this.stop();
 
     if (!this.current) {
@@ -77,7 +77,7 @@ export default class Playlist extends Cassette {
       return;
     }
 
-    const dispatcher = this.guild.voiceConnection.playStream(stream, { volume: 0.2 });
+    const dispatcher = this.guild.voiceConnection.playStream(stream, options);
     this._playing = true;
     this.events.emit('playing');
 
@@ -91,7 +91,7 @@ export default class Playlist extends Cassette {
       const next = await this.next();
       if (!next) return this._destroy();
 
-      await this._start();
+      await this._start(options);
     });
   }
 
