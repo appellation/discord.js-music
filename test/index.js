@@ -4,6 +4,15 @@ const { YouTubeService } = require('cassette');
 
 const client = new Client();
 client.on('message', async m => {
+  switch (m.content) {
+    case 'next':
+      console.log(await m.guild.playlist.next());
+      return;
+    case 'stop':
+      m.guild.playlist.stop();
+      return;
+  }
+
   const added = await m.guild.playlist.add(m.content, [new YouTubeService(process.env.YOUTUBE)]);
   console.log(added);
   m.guild.playlist.start(m.member.voiceChannel);

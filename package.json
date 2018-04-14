@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "prepare": "gulp",
-    "test": "env-cmd test/.env node test/index.js"
+    "dev": "gulp && env-cmd test/.env node --trace-warnings test/index.js"
   },
   "typings": "typings/index.d.ts",
   "repository": {
@@ -19,12 +19,15 @@
   },
   "homepage": "https://github.com/appellation/discord.js-music#readme",
   "dependencies": {
-    "cassette": "^3.0.2"
+    "cassette": "^3.0.3"
+  },
+  "peerDependencies": {
+    "discord.js": "github:discordjs/discord.js#master"
   },
   "devDependencies": {
     "@types/node": "^8.0.26",
     "del": "^3.0.0",
-    "discord.js": "^11.2.1",
+    "discord.js": "github:discordjs/discord.js",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.2",
     "node-opus": "^0.2.7",

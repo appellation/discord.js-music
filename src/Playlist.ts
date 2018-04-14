@@ -20,6 +20,7 @@ export default class Playlist extends Cassette {
   public readonly events: EventEmitter = new EventEmitter();
   public readonly guild: GuildExtension;
   private _playing: boolean = false;
+  protected _endListener: () => any = () => {};
 
   constructor(guild: GuildExtension) {
     super();
@@ -30,16 +31,27 @@ export default class Playlist extends Cassette {
     return this.guild.voiceConnection ? this.guild.voiceConnection.dispatcher : null;
   }
 
-  get playing(): boolean {
+  public get playing(): boolean {
     return this._playing;
   }
 
+  public next() {
+    const hasNext = super.next();
+    if (this._playing) this._end();
+    return hasNext;
+  }
+
   public stop(): void {
-    return this._end('temp');
+    this._endListener = () => {
+      // do nothing
+    };
+
+    return this._end();
   }
 
   public destroy(): void {
-    return this._end('terminal');
+    this.reset();
+    return this.stop();
   }
 
   public pause(): void {
@@ -58,7 +70,7 @@ export default class Playlist extends Cassette {
   }
 
   private async _start(options?: StreamOptions): Promise<void> {
-    this.stop();
+    if (this._playing) this.stop();
 
     if (!this.current) {
       this.events.emit('error', new Error(Code.NO_CURRENT_SONG));
@@ -68,7 +80,7 @@ export default class Playlist extends Cassette {
     const stream = await this.current.stream();
     stream.once('error', (e) => {
       this._playing = false;
-      this.events.emit('streamError', e);
+      this.events.emit('error', e);
       this._end();
     });
 
@@ -77,26 +89,29 @@ export default class Playlist extends Cassette {
       return;
     }
 
-    const dispatcher = this.guild.voiceConnection.playStream(stream, options);
+    const dispatcher = this.guild.voiceConnection.play(stream, options);
     this._playing = true;
     this.events.emit('playing');
 
-    dispatcher.once('end', async (reason: EndReason | 'user') => {
-      this._playing = false;
-      this.events.emit('ended', reason);
-
-      if (reason === 'temp') return;
-      if (reason === 'terminal') return this._destroy();
-
+    this._endListener = async () => {
       const next = await this.next();
       if (!next) return this._destroy();
 
       await this._start(options);
+    };
+
+    dispatcher.once('end', () => {
+      if (!this._playing) return;
+
+      this._playing = false;
+      this.events.emit('ended');
+
+      this._endListener();
     });
   }
 
-  private _end(reason: EndReason = 'terminal'): void {
-    if (this._dispatcher) this._dispatcher.end(reason);
+  private _end(): void {
+    if (this._dispatcher) this._dispatcher.end();
   }
 
   private _destroy(): void {
