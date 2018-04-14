@@ -1,13 +1,21 @@
-import { Guild } from 'discord.js';
+import { Guild, Structures } from 'discord.js';
 
 import Error from './Error';
-import GuildExtension from './GuildExtension';
 import Playlist from './Playlist';
 
-GuildExtension.applyToClass(Guild);
+declare module 'discord.js' {
+  interface Guild {
+    playlist: Playlist;
+  }
+}
+
+Structures.extend('Guild', Guild => {
+  return class GuildExtension extends Guild {
+    public playlist: Playlist = new Playlist(this);
+  }
+});
 
 export {
   Error,
-  GuildExtension,
   Playlist,
 };

@@ -3,7 +3,6 @@ import { Playlist as Cassette, Song } from 'cassette';
 import { Client, Guild, StreamDispatcher, StreamOptions, VoiceChannel, VoiceConnection } from 'discord.js';
 
 import Error, { Code } from './Error';
-import GuildExtension from './GuildExtension';
 
 export type EndReason = 'temp' | 'terminal';
 
@@ -18,11 +17,11 @@ export default class Playlist extends Cassette {
   }
 
   public readonly events: EventEmitter = new EventEmitter();
-  public readonly guild: GuildExtension;
+  public readonly guild: Guild;
   private _playing: boolean = false;
   protected _endListener: () => any = () => {};
 
-  constructor(guild: GuildExtension) {
+  constructor(guild: Guild) {
     super();
     this.guild = guild;
   }
