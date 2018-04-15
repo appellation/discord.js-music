@@ -4,8 +4,6 @@ import { Client, Guild, StreamDispatcher, StreamOptions, VoiceChannel, VoiceConn
 
 import Error, { Code } from './Error';
 
-export type EndReason = 'temp' | 'terminal';
-
 export default class Playlist extends Cassette {
   public static ensureVoiceConnection(channel: VoiceChannel): Promise<VoiceConnection> {
     if (channel.connection) return Promise.resolve(channel.connection);
@@ -18,7 +16,8 @@ export default class Playlist extends Cassette {
 
   public readonly events: EventEmitter = new EventEmitter();
   public readonly guild: Guild;
-  private _playing: boolean = false;
+  public options?: StreamOptions;
+  protected _playing: boolean = false;
   protected _endListener: () => any = () => {};
 
   constructor(guild: Guild) {
@@ -35,9 +34,12 @@ export default class Playlist extends Cassette {
   }
 
   public next() {
-    const hasNext = super.next();
-    if (this._playing) this._end();
-    return hasNext;
+    this._endListener = () => {
+      return this._start();
+    };
+
+    this._end();
+    return super.next();
   }
 
   public stop(): void {
@@ -65,11 +67,12 @@ export default class Playlist extends Cassette {
 
   public async start(channel: VoiceChannel, options?: StreamOptions): Promise<void> {
     await Playlist.ensureVoiceConnection(channel);
-    await this._start(options);
+    this.options = options;
+    await this._start();
   }
 
-  private async _start(options?: StreamOptions): Promise<void> {
-    if (this._playing) this.stop();
+  private async _start(): Promise<void> {
+    if (this._playing) return;
 
     if (!this.current) {
       this.events.emit('error', new Error(Code.NO_CURRENT_SONG));
@@ -88,7 +91,7 @@ export default class Playlist extends Cassette {
       return;
     }
 
-    const dispatcher = this.guild.voiceConnection.play(stream, options);
+    const dispatcher = this.guild.voiceConnection.play(stream, this.options);
     this._playing = true;
     this.events.emit('playing');
 
@@ -96,16 +99,20 @@ export default class Playlist extends Cassette {
       const next = await this.next();
       if (!next) return this._destroy();
 
-      await this._start(options);
+      await this._start();
     };
 
-    dispatcher.once('end', () => {
+    dispatcher.once('end', async () => {
       if (!this._playing) return;
 
       this._playing = false;
       this.events.emit('ended');
 
-      this._endListener();
+      try {
+        await this._endListener();
+      } catch (e) {
+        this.events.emit('error', e);
+      }
     });
   }
 
